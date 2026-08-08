@@ -51,10 +51,19 @@ const App = {
   },
 
   async _seedInitialData() {
+    // Purge any previous demo files if present
+    const allDocs = await DB.getAllDocuments();
+    const demoNames = ['Passport_Scan.pdf', 'National_ID_Card.png', 'Driving_License.png', 'Bank_Statement_Q3.pdf', 'Health_Insurance_Policy.pdf'];
+    for (const doc of allDocs) {
+      if (demoNames.includes(doc.name)) {
+        await DB.deleteDocument(doc.id);
+      }
+    }
+
     const existing = await DB.getFolders();
     if (existing.length > 0) return;
 
-    // Default folders matching the sample designs
+    // Clean folder structure
     const defaults = [
       { id: 'f_kyc', name: 'KYC Documents', category: 'kyc', icon: '🪪' },
       { id: 'f_identity', name: 'Identity Cards', category: 'identity', icon: '👤' },
@@ -69,80 +78,6 @@ const App = {
     for (const f of defaults) {
       await DB.saveFolder({ ...f, count: 0, size: 0, createdAt: Date.now() });
     }
-
-    // Default sample cards
-    const sampleDocs = [
-      {
-        folderId: 'f_kyc',
-        name: 'Passport_Scan.pdf',
-        mimeType: 'application/pdf',
-        size: 2450000,
-        data: 'data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDM4L0ZpbHRlci9GbGF0ZURlY29kZT4+c3RyZWFtCnicS0wuyczPU0jKT87P9fX18/NzUvBKLU5VMDQyMDAwMzAyMDEyNgD3kgrrCmVuZHN0cmVhbQplbmRvYmoKMSAwIG9iago8PC9UeXBlL1BhZ2UvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERi9UZXh0XT4+L0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbMSAwIFJdPj4+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDk5IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDE4NSAwMDAwMCBuIAp0cmFpbGVyCjw8L1NpemUgNC9Sb290IDMgMCBSPj4Kc3RhcnR4cmVmCjI1NAolJUVPRg==',
-        createdAt: Date.now() - 3600000 * 2
-      },
-      {
-        folderId: 'f_identity',
-        name: 'National_ID_Card.png',
-        mimeType: 'image/svg+xml',
-        size: 1120000,
-        thumbnail: this._generateSampleCardSvg('National Identity Card', '#2563EB', '🪪'),
-        data: this._generateSampleCardSvg('National Identity Card', '#2563EB', '🪪'),
-        createdAt: Date.now() - 3600000 * 6
-      },
-      {
-        folderId: 'f_identity',
-        name: 'Driving_License.png',
-        mimeType: 'image/svg+xml',
-        size: 1450000,
-        thumbnail: this._generateSampleCardSvg('Driving License', '#D97706', '🚗'),
-        data: this._generateSampleCardSvg('Driving License', '#D97706', '🚗'),
-        createdAt: Date.now() - 3600000 * 20
-      },
-      {
-        folderId: 'f_bank',
-        name: 'Bank_Statement_Q3.pdf',
-        mimeType: 'application/pdf',
-        size: 3200000,
-        data: 'data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDM4L0ZpbHRlci9GbGF0ZURlY29kZT4+c3RyZWFtCnicS0wuyczPU0jKT87P9fX18/NzUvBKLU5VMDQyMDAwMzAyMDEyNgD3kgrrCmVuZHN0cmVhbQplbmRvYmoKMSAwIG9iago8PC9UeXBlL1BhZ2UvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERi9UZXh0XT4+L0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbMSAwIFJdPj4+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDk5IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDE4NSAwMDAwMCBuIAp0cmFpbGVyCjw8L1NpemUgNC9Sb290IDMgMCBSPj4Kc3RhcnR4cmVmCjI1NAolJUVPRg==',
-        createdAt: Date.now() - 86400000 * 2
-      },
-      {
-        folderId: 'f_insurance',
-        name: 'Health_Insurance_Policy.pdf',
-        mimeType: 'application/pdf',
-        size: 1980000,
-        data: 'data:application/pdf;base64,JVBERi0xLjQKJcOkw7zDtsOfCjIgMCBvYmoKPDwvTGVuZ3RoIDM4L0ZpbHRlci9GbGF0ZURlY29kZT4+c3RyZWFtCnicS0wuyczPU0jKT87P9fX18/NzUvBKLU5VMDQyMDAwMzAyMDEyNgD3kgrrCmVuZHN0cmVhbQplbmRvYmoKMSAwIG9iago8PC9UeXBlL1BhZ2UvTWVkaWFCb3hbMCAwIDU5NSA4NDJdL1Jlc291cmNlczw8L1Byb2NTZXRbL1BERi9UZXh0XT4+L0NvbnRlbnRzIDIgMCBSPj4KZW5kb2JqCjMgMCBvYmoKPDwvVHlwZS9DYXRhbG9nL1BhZ2VzPDwvVHlwZS9QYWdlcy9Db3VudCAxL0tpZHNbMSAwIFJdPj4+PgplbmRvYmoKeHJlZgowIDQKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDk5IDAwMDAwIG4gCjAwMDAwMDAwMTUgMDAwMDAgbiAKMDAwMDAwMDE4NSAwMDAwMCBuIAp0cmFpbGVyCjw8L1NpemUgNC9Sb290IDMgMCBSPj4Kc3RhcnR4cmVmCjI1NAolJUVPRg==',
-        createdAt: Date.now() - 86400000 * 4
-      }
-    ];
-
-    for (const doc of sampleDocs) {
-      await DB.saveDocument(doc);
-    }
-  },
-
-  _generateSampleCardSvg(title, color, emoji) {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="600" height="380">
-      <defs>
-        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="${color}"/>
-          <stop offset="100%" stop-color="#0F172A"/>
-        </linearGradient>
-      </defs>
-      <rect width="600" height="380" rx="28" fill="url(#g)"/>
-      <circle cx="500" cy="80" r="140" fill="rgba(255,255,255,0.08)"/>
-      <circle cx="460" cy="300" r="160" fill="rgba(255,255,255,0.04)"/>
-      <text x="40" y="70" font-family="system-ui,sans-serif" font-size="38" fill="white">${emoji}</text>
-      <text x="40" y="130" font-family="system-ui,sans-serif" font-size="24" font-weight="700" fill="white">${title}</text>
-      <text x="40" y="165" font-family="system-ui,sans-serif" font-size="13" font-weight="600" fill="rgba(255,255,255,0.7)" letter-spacing="1">AUTHENTIC ENCRYPTED RECORD</text>
-      <rect x="40" y="210" width="180" height="12" rx="6" fill="rgba(255,255,255,0.2)"/>
-      <rect x="40" y="235" width="280" height="12" rx="6" fill="rgba(255,255,255,0.2)"/>
-      <rect x="40" y="260" width="220" height="12" rx="6" fill="rgba(255,255,255,0.2)"/>
-      <text x="40" y="335" font-family="monospace" font-size="18" fill="rgba(255,255,255,0.9)" letter-spacing="4">•••• •••• •••• 8842</text>
-      <rect x="460" y="270" width="90" height="60" rx="12" fill="rgba(255,255,255,0.15)"/>
-      <text x="485" y="310" font-family="system-ui,sans-serif" font-size="28" fill="white">✓</text>
-    </svg>`;
-    return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
   },
 
   _setupDragAndDrop() {
