@@ -43,8 +43,8 @@ const UI = {
     const size = Crypto.formatSize(folder.size || 0);
     const icon = folder.icon || cat.icon;
     const color = cat.color || '#2563EB';
-    const bg = cat.bg || 'rgba(37, 99, 235, 0.15)';
-    const pct = Math.min(100, Math.max(12, (count / 10) * 100));
+    const bg = cat.bg || 'rgba(37, 99, 235, 0.12)';
+    const pct = Math.min(100, (count / 10) * 100);
 
     return `
       <div class="folder-card" onclick="App.openFolder('${folder.id}')" role="button" tabindex="0">
@@ -52,16 +52,17 @@ const UI = {
           <div class="folder-icon-box" style="background:${bg}; color:${color}">
             <span>${icon}</span>
           </div>
-          <button class="folder-dots-btn" onclick="event.stopPropagation();UI.showFolderMenu('${folder.id}',event)" title="Options">
+          <button class="folder-dots-btn" onclick="event.stopPropagation();UI.showFolderMenu('${folder.id}',event)" title="Options" aria-label="Folder options">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
           </button>
         </div>
         <div class="folder-card-info">
-          <div class="folder-card-name">${this.escHtml(folder.name)}</div>
-          <div class="folder-card-meta">${count} item${count !== 1 ? 's' : ''} • ${size}</div>
+          <div class="folder-card-name" title="${this.escHtml(folder.name)}">${this.escHtml(folder.name)}</div>
+          <div class="folder-card-meta">${count === 0 ? '<span class="empty-pill">0 files</span>' : `${count} item${count !== 1 ? 's' : ''} • ${size}`}</div>
+          ${count > 0 ? `
           <div class="folder-progress-bar">
             <div class="folder-progress-fill" style="width:${pct}%;background:${color}"></div>
-          </div>
+          </div>` : ''}
         </div>
       </div>
     `;
