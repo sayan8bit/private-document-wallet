@@ -288,13 +288,13 @@ const App = {
 
     if (docs.length === 0) {
       container.innerHTML = `
-        <div class="empty-state">
-          <div class="empty-icon">📄</div>
-          <div class="empty-text">Folder is empty</div>
-          <div class="empty-sub">Import files or scan documents with your camera</div>
-          <div style="display:flex;gap:10px;margin-top:16px">
-            <button class="btn-primary" onclick="App.triggerUpload()">📁 Import File</button>
-            <button class="btn-secondary" onclick="App.openCameraScanner()">📷 Scan Document</button>
+        <div class="empty-dropzone-box" onclick="App.triggerUpload()">
+          <div class="dropzone-icon">📥</div>
+          <div class="dropzone-title">Folder is Empty</div>
+          <div class="dropzone-sub">Drag &amp; drop files here or use the buttons below</div>
+          <div class="dropzone-actions">
+            <button class="btn-primary" onclick="event.stopPropagation();App.triggerUpload()">📁 Import File</button>
+            <button class="btn-secondary" onclick="event.stopPropagation();App.openCameraScanner()">📷 Scan Camera</button>
           </div>
         </div>`;
       return;
