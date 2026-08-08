@@ -92,29 +92,11 @@
 
     <!-- ── HOME VIEW ────────────────────────────── -->
     <div class="view" id="view-home">
-      <!-- Top App Header -->
+      <!-- Top App Header (Clean & Minimalist) -->
       <div class="app-header">
         <div class="header-left">
           <div class="header-title-main">My Secure Files</div>
           <div class="header-sub-badge" id="storage-pill-count">0 Folders</div>
-        </div>
-        <div class="header-actions">
-          <button class="icon-btn" onclick="App.toggleTheme()" title="Toggle Dark/Light" aria-label="Theme">
-            🌓
-          </button>
-          <button class="icon-btn" onclick="App.openCameraScanner()" title="Scan Document" aria-label="Scan">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
-            </svg>
-          </button>
-          <button class="icon-btn" onclick="App.triggerUpload()" title="Import File" aria-label="Upload">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </button>
-          <button class="icon-btn" onclick="App.showView('settings')" title="Settings" aria-label="Settings">
-            ⚙️
-          </button>
         </div>
       </div>
 
@@ -182,7 +164,7 @@
       </div>
     </div>
 
-    <!-- ── FOLDER VIEW ──────────────────────────── -->
+    <!-- ── FOLDER VIEW (Clean, single unified action bar) ── -->
     <div class="view" id="view-folder">
       <div class="app-header">
         <div class="header-left">
@@ -194,14 +176,15 @@
           <div class="header-title-main" id="folder-header-title">Folder</div>
         </div>
         <div class="header-actions">
-          <button class="icon-btn" onclick="App.openCameraScanner()" title="Scan Document">
+          <button class="btn-header-add" onclick="App.triggerUpload()" title="Add File">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            <span>Upload</span>
+          </button>
+          <button class="icon-btn" onclick="App.openCameraScanner()" title="Scan Camera">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
-            </svg>
-          </button>
-          <button class="icon-btn" onclick="App.triggerUpload()" title="Upload File">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
             </svg>
           </button>
         </div>
@@ -212,12 +195,6 @@
           <!-- Rendered dynamically -->
         </div>
       </div>
-
-      <button class="nav-fab-center" style="position:fixed;right:20px;bottom:80px;z-index:30" onclick="App.triggerUpload()" title="Add Document">
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-        </svg>
-      </button>
     </div>
 
     <!-- ── DOCUMENT VIEWER ────────────────────────── -->
@@ -256,17 +233,10 @@
       </div>
     </div>
 
-    <!-- ── RECENT VIEW ──────────────────────────── -->
+    <!-- ── RECENT VIEW (Clean & Minimalist) ──── -->
     <div class="view" id="view-recent">
       <div class="app-header">
         <div class="header-title-main">Recent Documents</div>
-        <div class="header-actions">
-          <button class="icon-btn" onclick="App.triggerUpload()" title="Upload">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-            </svg>
-          </button>
-        </div>
       </div>
 
       <div class="scroll-area" style="padding-top:14px">
@@ -344,7 +314,7 @@
       </div>
     </div>
 
-    <!-- ── BOTTOM NAVIGATION (Mobile / Tablet) ──── -->
+    <!-- ── BOTTOM NAVIGATION (Mobile Only - Clean 4-tab bar) ── -->
     <nav class="bottom-nav" id="bottom-nav">
       <button class="nav-item active" data-view="home" onclick="App.showView('home')" aria-label="Folders">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -361,18 +331,18 @@
         <span class="nav-label">Recent</span>
       </button>
 
-      <!-- Center Action Button -->
-      <button class="nav-fab-center" onclick="App.openCameraScanner()" aria-label="Scan" title="Scan or Upload">
+      <!-- Clean Central Action Button -->
+      <button class="nav-fab-center" onclick="App.triggerUpload()" aria-label="Add" title="Upload Document">
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
         </svg>
       </button>
 
-      <button class="nav-item" onclick="App.showCreateFolder()" aria-label="New Folder">
+      <button class="nav-item" onclick="App.openCameraScanner()" aria-label="Scan">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
         </svg>
-        <span class="nav-label">New</span>
+        <span class="nav-label">Scan</span>
       </button>
 
       <button class="nav-item" data-view="settings" onclick="App.showView('settings')" aria-label="Settings">
