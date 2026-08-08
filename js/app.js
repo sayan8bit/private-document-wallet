@@ -616,7 +616,7 @@ const App = {
     });
   },
 
-  // ── Document Scanner (Camera) ─────────────────────────────
+  // ── Document Scanner (Camera with 4:3 Framing) ────────────
   async openCameraScanner() {
     const existing = document.getElementById('scanner-overlay');
     if (existing) existing.remove();
@@ -625,13 +625,20 @@ const App = {
     overlay.className = 'modal-overlay';
     overlay.id = 'scanner-overlay';
     overlay.innerHTML = `
-      <div class="modal" style="max-width:500px">
-        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center">
+      <div class="modal" style="max-width:480px">
+        <div class="modal-title" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span>📷 Document Scanner</span>
-          <button class="icon-btn" onclick="App.closeCameraScanner()">✕</button>
+          <button class="icon-btn" onclick="App.closeCameraScanner()" aria-label="Close">✕</button>
         </div>
         <div class="scanner-viewport">
-          <video id="scanner-video" autoplay playsinline style="width:100%;height:100%;object-fit:cover"></video>
+          <video id="scanner-video" class="scanner-video-feed" autoplay playsinline></video>
+          <div class="scanner-guide-box">
+            <div class="scanner-corner tl"></div>
+            <div class="scanner-corner tr"></div>
+            <div class="scanner-corner bl"></div>
+            <div class="scanner-corner br"></div>
+          </div>
+          <div class="scanner-aspect-badge">📄 4:3 Standard Document Frame</div>
           <div class="scanner-laser"></div>
         </div>
         <div class="modal-actions" style="margin-top:14px">
@@ -644,7 +651,7 @@ const App = {
 
     try {
       this.cameraStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1080 } },
+        video: { facingMode: 'environment', width: { ideal: 1920 }, height: { ideal: 1440 } },
         audio: false
       });
       const video = document.getElementById('scanner-video');
@@ -668,13 +675,31 @@ const App = {
     const video = document.getElementById('scanner-video');
     if (!video) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 1280;
-    canvas.height = video.videoHeight || 720;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 960;
 
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+    // Crop to 4:3 aspect ratio matching the visual viewfinder
+    const targetAspect = 4 / 3;
+    let cropW = vw;
+    let cropH = vh;
+    let cropX = 0;
+    let cropY = 0;
+
+    if (vw / vh > targetAspect) {
+      cropW = vh * targetAspect;
+      cropX = (vw - cropW) / 2;
+    } else {
+      cropH = vw / targetAspect;
+      cropY = (vh - cropH) / 2;
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.min(1600, cropW);
+    canvas.height = Math.min(1200, cropH);
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, canvas.width, canvas.height);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
     const thumbnail = await this._generateThumbnail(dataUrl);
 
     const targetFolderId = this.currentFolderId || 'f_kyc';
@@ -777,24 +802,6 @@ const App = {
       }
     };
     input.click();
-  },
-
-  confirmClearData() {
-    UI.showModal({
-      title: '⚠️ Wipe All Local Data',
-      body: 'This will permanently delete ALL folders and documents stored in this browser vault.',
-      confirmText: 'Wipe Everything',
-      dangerous: true,
-      onConfirm: async () => {
-        try {
-          const req = indexedDB.deleteDatabase('PrivateDocWallet');
-          req.onsuccess = () => location.reload();
-          req.onerror = () => location.reload();
-        } catch (e) {
-          location.reload();
-        }
-      }
-    });
   },
 
   // ── Toast Notification ────────────────────────────────────
