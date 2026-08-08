@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B0F19" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DocVault" />
+  <meta name="description" content="Minimal & secure offline document wallet." />
+  <title>Private Document Vault — Local & Offline</title>
+
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.png" />
+  <link rel="icon" type="image/png" href="./icons/icon-192.png" />
+
+  <!-- Fonts & Style -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+
+<!-- Offline Status Pill -->
+<div class="offline-badge" id="offline-badge">📡 Offline Vault</div>
+
+<!-- Install Banner -->
+<div class="install-banner" id="install-banner">
+  <span class="install-banner-text">📥 Add DocVault to Home Screen</span>
+  <div class="install-banner-btns">
+    <button id="install-btn">Install</button>
+    <button id="install-dismiss">✕</button>
+  </div>
+</div>
+
+<!-- Hidden File Inputs -->
+<input type="file" id="file-input" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt" style="display:none"
+  onchange="App.handleFileUpload(this.files); this.value=''" />
+
+<!-- ═══════════════════════════════════════════════
+     APP SHELL
+     ═══════════════════════════════════════════════ -->
+<div id="app">
+
+  <!-- ── SIDEBAR (Desktop ≥ 900px) ──────────────── -->
+  <nav id="sidebar" aria-label="Main navigation">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-icon">🛡️</div>
+      <div>
+        <div class="sidebar-brand-name">DocVault</div>
+        <div class="sidebar-brand-tag">● Local &amp; Private</div>
+      </div>
+    </div>
+
+    <div class="sidebar-nav">
+      <button class="sidebar-nav-item active" data-view="home" onclick="App.showView('home')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span>All Folders</span>
+      </button>
+
+      <button class="sidebar-nav-item" data-view="recent" onclick="App.showView('recent')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <span>Recent Files</span>
+      </button>
+
+      <button class="sidebar-nav-item" data-view="settings" onclick="App.showView('settings')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span>Backup &amp; Settings</span>
+      </button>
+
+      <button class="sidebar-action-btn" onclick="App.showCreateFolder()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span>+ New Folder</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ── ALL VIEWS IN #app-content ──────────────── -->
+  <div id="app-content">
+
+    <!-- ── HOME VIEW ────────────────────────────── -->
+    <div class="view" id="view-home">
+      <!-- Top App Header -->
+      <div class="app-header">
+        <div class="header-left">
+          <div class="header-title-main">My Secure Files</div>
+          <div class="header-sub-badge" id="storage-pill-count">0 Folders</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="App.toggleTheme()" title="Toggle Dark/Light" aria-label="Theme">
+            🌓
+          </button>
+          <button class="icon-btn" onclick="App.openCameraScanner()" title="Scan Document" aria-label="Scan">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="App.triggerUpload()" title="Import File" aria-label="Upload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="App.showView('settings')" title="Settings" aria-label="Settings">
+            ⚙️
+          </button>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <input type="text" id="search-input" placeholder="Search files, folders and tags…" oninput="App.handleSearch(this.value)" />
+      </div>
+
+      <!-- Quick Category Pills -->
+      <div class="category-pills" id="category-pills">
+        <button class="category-pill active" onclick="App.filterCategory('all', this)">✨ All</button>
+        <button class="category-pill" onclick="App.filterCategory('kyc', this)">🪪 KYC</button>
+        <button class="category-pill" onclick="App.filterCategory('identity', this)">👤 Identity</button>
+        <button class="category-pill" onclick="App.filterCategory('bank', this)">🏦 Banking</button>
+        <button class="category-pill" onclick="App.filterCategory('insurance', this)">🛡️ Insurance</button>
+        <button class="category-pill" onclick="App.filterCategory('education', this)">🎓 Education</button>
+        <button class="category-pill" onclick="App.filterCategory('vehicle', this)">🚗 Vehicle</button>
+        <button class="category-pill" onclick="App.filterCategory('medical', this)">🏥 Medical</button>
+        <button class="category-pill" onclick="App.filterCategory('work', this)">💼 Work</button>
+      </div>
+
+      <!-- Storage Summary Card -->
+      <div class="storage-summary-card">
+        <div class="storage-stat-group">
+          <div class="storage-stat-icon">🗄️</div>
+          <div class="storage-stat-info">
+            <div class="storage-stat-title" id="stat-main-storage">0 Documents • 0 B</div>
+            <div class="storage-stat-sub">100% Encrypted &amp; Stored Locally</div>
+          </div>
+        </div>
+        <div class="storage-stat-actions">
+          <button class="btn-sm" onclick="App.showCreateFolder()">+ Folder</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Folders & Docs List -->
+      <div class="scroll-area">
+        <div class="section-bar">
+          <div class="section-heading">My Folders</div>
+          <button class="icon-btn" id="toggle-view-btn" onclick="App.toggleView()" title="Toggle View">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Folders Container -->
+        <div class="folders-grid" id="folders-grid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <!-- Recent Documents Preview inside Home -->
+        <div class="section-bar" style="margin-top:14px">
+          <div class="section-heading">Recently Added Files</div>
+          <button class="btn-sm" onclick="App.showView('recent')">View All →</button>
+        </div>
+        <div class="recent-docs-section" id="home-recent-docs">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div style="height:20px"></div>
+      </div>
+    </div>
+
+    <!-- ── FOLDER VIEW ──────────────────────────── -->
+    <div class="view" id="view-folder">
+      <div class="app-header">
+        <div class="header-left">
+          <button class="header-back-btn" onclick="App.goBack()" aria-label="Back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <div class="header-title-main" id="folder-header-title">Folder</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="App.openCameraScanner()" title="Scan Document">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="App.triggerUpload()" title="Upload File">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="scroll-area" style="padding-top:14px">
+        <div class="recent-docs-section" id="folder-docs">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+
+      <button class="nav-fab-center" style="position:fixed;right:20px;bottom:80px;z-index:30" onclick="App.triggerUpload()" title="Add Document">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- ── DOCUMENT VIEWER ────────────────────────── -->
+    <div class="view" id="view-viewer">
+      <div class="app-header">
+        <div class="header-left">
+          <button class="header-back-btn" onclick="App.goBack()" aria-label="Back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <div class="header-title-main" id="doc-viewer-title" style="font-size:15px">Document</div>
+        </div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="App.shareDocument()" title="Share">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+            </svg>
+          </button>
+          <button class="icon-btn" onclick="App.deleteDocument()" title="Delete">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="viewer-body" id="doc-viewer-content">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <div class="viewer-bottom-bar">
+        <button class="btn-secondary" onclick="App.downloadDocument()">⬇️ Download File</button>
+        <button class="btn-primary" onclick="App.shareDocument()">🔗 Share Document</button>
+      </div>
+    </div>
+
+    <!-- ── RECENT VIEW ──────────────────────────── -->
+    <div class="view" id="view-recent">
+      <div class="app-header">
+        <div class="header-title-main">Recent Documents</div>
+        <div class="header-actions">
+          <button class="icon-btn" onclick="App.triggerUpload()" title="Upload">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="scroll-area" style="padding-top:14px">
+        <div class="recent-docs-section" id="recent-docs-list">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SETTINGS VIEW ────────────────────────── -->
+    <div class="view" id="view-settings">
+      <div class="app-header">
+        <div class="header-left">
+          <button class="header-back-btn" onclick="App.goBack()" aria-label="Back">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"/>
+            </svg>
+          </button>
+          <div class="header-title-main">Vault Settings &amp; Backup</div>
+        </div>
+      </div>
+
+      <div class="scroll-area" style="padding-top:14px">
+        <!-- Appearance -->
+        <div class="storage-summary-card" style="cursor:pointer" onclick="App.toggleTheme()">
+          <div class="storage-stat-group">
+            <div class="storage-stat-icon">🌓</div>
+            <div class="storage-stat-info">
+              <div class="storage-stat-title" id="theme-label">Cyber Dark Theme</div>
+              <div class="storage-stat-sub">Tap to toggle Dark / Light mode</div>
+            </div>
+          </div>
+          <button class="btn-sm">Switch</button>
+        </div>
+
+        <!-- Backup & Export -->
+        <div class="storage-summary-card" style="cursor:pointer" onclick="App.exportBackup()">
+          <div class="storage-stat-group">
+            <div class="storage-stat-icon">💾</div>
+            <div class="storage-stat-info">
+              <div class="storage-stat-title">Export Complete Backup</div>
+              <div class="storage-stat-sub">Download all folders &amp; documents as JSON</div>
+            </div>
+          </div>
+          <button class="btn-sm">Export</button>
+        </div>
+
+        <div class="storage-summary-card" style="cursor:pointer" onclick="App.importBackup()">
+          <div class="storage-stat-group">
+            <div class="storage-stat-icon">📥</div>
+            <div class="storage-stat-info">
+              <div class="storage-stat-title">Restore from Backup</div>
+              <div class="storage-stat-sub">Import wallet JSON file from your device</div>
+            </div>
+          </div>
+          <button class="btn-sm">Import</button>
+        </div>
+
+        <!-- Wipe data -->
+        <div class="storage-summary-card" style="cursor:pointer" onclick="App.confirmClearData()">
+          <div class="storage-stat-group">
+            <div class="storage-stat-icon" style="background:rgba(239,68,68,0.15);color:var(--danger)">🗑️</div>
+            <div class="storage-stat-info">
+              <div class="storage-stat-title" style="color:var(--danger)">Clear All Stored Data</div>
+              <div class="storage-stat-sub">Permanently delete IndexedDB local database</div>
+            </div>
+          </div>
+          <button class="btn-sm" style="color:var(--danger)">Wipe</button>
+        </div>
+
+        <div style="text-align:center;padding:28px 16px;color:var(--text-dim);font-size:12px">
+          🛡️ Private Document Vault • v2.1 Pro<br>
+          <span>100% Local-First Offline Storage</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BOTTOM NAVIGATION (Mobile / Tablet) ──── -->
+    <nav class="bottom-nav" id="bottom-nav">
+      <button class="nav-item active" data-view="home" onclick="App.showView('home')" aria-label="Folders">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        <span class="nav-label">Vault</span>
+      </button>
+
+      <button class="nav-item" data-view="recent" onclick="App.showView('recent')" aria-label="Documents">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+        </svg>
+        <span class="nav-label">Recent</span>
+      </button>
+
+      <!-- Center Action Button -->
+      <button class="nav-fab-center" onclick="App.openCameraScanner()" aria-label="Scan" title="Scan or Upload">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>
+        </svg>
+      </button>
+
+      <button class="nav-item" onclick="App.showCreateFolder()" aria-label="New Folder">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        <span class="nav-label">New</span>
+      </button>
+
+      <button class="nav-item" data-view="settings" onclick="App.showView('settings')" aria-label="Settings">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+
+  </div><!-- /#app-content -->
+</div><!-- /#app -->
+
+<!-- Scripts -->
+<script src="./js/crypto.js"></script>
+<script src="./js/db.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/app.js"></script>
+
+<script>
+  // ── Bottom nav view synchronization ───────────────────────
+  const NAV_VISIBLE_VIEWS = ['home', 'recent', 'settings'];
+  const origShowView = App.showView.bind(App);
+  App.showView = async function(name, pushStack) {
+    await origShowView(name, pushStack);
+    const nav = document.getElementById('bottom-nav');
+    if (nav) nav.style.display = NAV_VISIBLE_VIEWS.includes(name) ? 'flex' : 'none';
+  };
+
+  // ── Offline status banner ─────────────────────────────────
+  const offlineBadge = document.getElementById('offline-badge');
+  function updateOnlineStatus() {
+    if (offlineBadge) offlineBadge.style.display = navigator.onLine ? 'none' : 'block';
+  }
+  window.addEventListener('online', updateOnlineStatus);
+  window.addEventListener('offline', updateOnlineStatus);
+  updateOnlineStatus();
+</script>
+
+</body>
+</html>
