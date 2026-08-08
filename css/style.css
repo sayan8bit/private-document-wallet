@@ -1,11 +1,11 @@
 /* ════════════════════════════════════════════════════════════
-   Private Document Wallet — Executive Professional Design System
+   Private Document Wallet — Executive Unified Design System
    ════════════════════════════════════════════════════════════ */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Professional Dark Theme (Executive Navy & Slate) */
+  /* Executive Dark Theme (Navy Slate & Crisp Neutral) */
   --bg:            #0C111C;
   --bg-subtle:     #111827;
   --surface:       #151E2E;
@@ -46,7 +46,7 @@
   --gap:           16px;
 }
 
-/* Executive Light Theme (Clean Crisp Platinum) */
+/* Executive Light Theme */
 body.theme-light {
   --bg:            #F8FAFC;
   --bg-subtle:     #F1F5F9;
@@ -82,7 +82,7 @@ html, body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── App Shell Layout ──────────────────────────────────────── */
+/* ── App Shell ─────────────────────────────────────────────── */
 #app {
   position: relative;
   width: 100%;
@@ -125,7 +125,7 @@ html, body {
 .scroll-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
 body.theme-light .scroll-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); }
 
-/* ── Keyframes ─────────────────────────────────────────────── */
+/* ── Animations ────────────────────────────────────────────── */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { transform: translateY(10px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 .slide-up { animation: slideUp 0.22s cubic-bezier(0.16, 1, 0.3, 1) both; }
@@ -214,7 +214,17 @@ body.theme-light .scroll-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,
   border: 1px solid var(--border);
 }
 
-.header-actions { display: flex; align-items: center; gap: 6px; }
+.header-actions { display: flex; align-items: center; gap: 8px; }
+
+.header-back-btn {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text); transition: all 0.15s;
+}
+.header-back-btn:hover { border-color: rgba(255,255,255,0.2); }
 
 .icon-btn {
   width: 36px; height: 36px;
@@ -227,8 +237,33 @@ body.theme-light .scroll-area::-webkit-scrollbar-thumb { background: rgba(0,0,0,
 }
 .icon-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
 body.theme-light .icon-btn:hover { border-color: rgba(0,0,0,0.2); }
-.icon-btn:active { transform: scale(0.95); }
-.icon-btn svg { width: 17px; height: 17px; }
+.empty-pill {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-dim);
+  opacity: 0.85;
+}
+
+/* Header Add File Button:
+   Hidden by default when bottom navigation menu is present.
+   Visible ONLY on desktop (>= 900px) when bottom menu is hidden. */
+.btn-header-add {
+  display: none !important;
+  padding: 8px 14px;
+  background: var(--primary);
+  color: white;
+  border-radius: var(--radius-xs);
+  font-size: 12px;
+  font-weight: 700;
+  align-items: center;
+  gap: 5px;
+  box-shadow: 0 2px 8px var(--primary-glow);
+  transition: all 0.15s;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.btn-header-add:hover { background: var(--primary-dark); }
+.btn-header-add svg { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* Search Container */
 .search-container {
@@ -278,7 +313,7 @@ body.theme-light .icon-btn:hover { border-color: rgba(0,0,0,0.2); }
 }
 
 /* ════════════════════════════════════════════════════════════
-   STORAGE BAR (Refined Corporate Design)
+   STORAGE BAR (Minimal Corporate Design)
    ════════════════════════════════════════════════════════════ */
 .storage-summary-card {
   margin: 10px var(--gap) 0;
@@ -404,7 +439,52 @@ body.theme-light .folder-progress-bar { background: rgba(0,0,0,0.06); }
 }
 
 /* ════════════════════════════════════════════════════════════
-   RECENT DOCUMENTS SECTION (List View)
+   UNIFIED EMPTY DROPZONE (No duplicate button clutter)
+   ════════════════════════════════════════════════════════════ */
+.empty-dropzone-box {
+  margin: 16px var(--gap);
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--surface-card);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.empty-dropzone-box:hover {
+  border-color: var(--primary);
+  background: var(--surface-hover);
+}
+
+.dropzone-icon {
+  width: 52px; height: 52px;
+  border-radius: 14px;
+  background: var(--primary-lite);
+  color: var(--primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; margin-bottom: 4px;
+}
+.dropzone-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.dropzone-sub   { font-size: 12.5px; color: var(--text-dim); max-width: 320px; line-height: 1.4; }
+
+.dropzone-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 320px;
+}
+.dropzone-actions .btn-primary,
+.dropzone-actions .btn-secondary {
+  flex: 1;
+}
+
+/* ════════════════════════════════════════════════════════════
+   DOCUMENT ROWS
    ════════════════════════════════════════════════════════════ */
 .recent-docs-section {
   margin-top: 10px;
@@ -447,7 +527,7 @@ body.theme-light .folder-progress-bar { background: rgba(0,0,0,0.06); }
 .doc-row-actions { display: flex; align-items: center; gap: 4px; }
 
 /* ════════════════════════════════════════════════════════════
-   BOTTOM NAVIGATION (Mobile Dock)
+   BOTTOM NAVIGATION (Mobile Only Dock - Clean & Uncluttered)
    ════════════════════════════════════════════════════════════ */
 .bottom-nav {
   position: fixed;
@@ -478,7 +558,7 @@ body.theme-light .folder-progress-bar { background: rgba(0,0,0,0.06); }
 
 .nav-fab-center {
   width: 48px; height: 48px;
-  border-radius: var(--radius-sm);
+  border-radius: 50%;
   background: var(--primary);
   color: white;
   display: flex; align-items: center; justify-content: center;
@@ -696,6 +776,7 @@ body.theme-light .cat-picker-opt:hover { border-color: rgba(0,0,0,0.2); }
   }
   #sidebar { display: flex; }
   .bottom-nav { display: none !important; }
+  .btn-header-add { display: inline-flex !important; }
   .scroll-area { padding-bottom: 24px; }
   .folders-grid { grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .toast { bottom: 24px; }
